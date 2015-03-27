@@ -9,7 +9,7 @@ if (!isset($_FILES['archivoPdf'])) {
 	exit('ya fue, gg tim nub');
 }
 
-$orientacion = isset($_POST['orientacion']) ? $_POST['orientacion'] : 'P';
+$rotar = isset($_POST['rotar']) ? $_POST['rotar'] : '0';
 
 // info de las imagenes
 $infoImagen = array();
@@ -43,6 +43,8 @@ for ($i = 0; $i < $totalPaginas; $i++) {
 	exec('convert -density 300 '.$pdfTemporal.'['.$i.'] '.$imagen);
 }
 
+
+
 // datos de la primera imagen
 $imagen = $rutaTemporal . $aleatorio . "-0.jpg";
 $image = new Imagick($imagen);
@@ -51,8 +53,49 @@ $infoImagen = $image->getImageGeometry();
 // generar el nuevo PDF
 require('scripts/fpdf/fpdf.php');
 
+class PDF extends FPDF {
+	const DPI = 96;
+	const MM_IN_INCH = 25.4;
+	const A4_HEIGHT = 297;
+	const A4_WIDTH = 210;
+	// tweak these values (in pixels)
+	const MAX_WIDTH = 800;
+	const MAX_HEIGHT = 500;
+
+	function pixelsToMM($val) {
+		return $val * self::MM_IN_INCH / self::DPI;
+	}
+
+	function resizeToFit($imgFilename) {
+		list($width, $height) = getimagesize($imgFilename);
+
+		$widthScale = self::MAX_WIDTH / $width;
+		$heightScale = self::MAX_HEIGHT / $height;
+
+		$scale = min($widthScale, $heightScale);
+
+		return array(
+			round($this->pixelsToMM($scale * $width)),
+			round($this->pixelsToMM($scale * $height))
+		);
+	}
+
+	function centreImage($img) {
+		list($width, $height) = $this->resizeToFit($img);
+
+		// you will probably want to swap the width/height
+		// around depending on the page's orientation
+		$this->Image(
+			$img, (self::A4_WIDTH - $height) / 2,
+			(self::A4_HEIGHT - $width) / 2,
+			$height,
+			$width
+		);
+	}
+}
+
 // el objeto FPDF
-$pdf = new FPDF($orientacion,'mm',array($infoImagen['width']*P2M, $infoImagen['height']*P2M));
+$pdf = new PDF();
 $pdf->AliasNbPages();
 
 // recorrer las paginas
@@ -62,10 +105,10 @@ for ($i = 0; $i < $totalPaginas; $i++) {
 	// validar que archivo exista
 	if (file_exists($imagen)) {
 		// agregar pagina al nuevo PDF
-		$pdf->AddPage();
+		$pdf->AddPage('P');
 
 		// imprimir la imagen
-		$pdf->Image($imagen, 0, 0);
+		$pdf->centreImage($imagen);
 		
 		// imprimir el contador
 		$contador = '00000' . (CONTADOR + $i);

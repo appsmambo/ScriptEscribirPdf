@@ -15,14 +15,7 @@
 						<input type="file" name="archivoPdf" id="pdf1" />
 						<br />
 						<br />
-						<select name="orientacion">
-							<option value="L">
-							Landscape (horizontal)
-							</option>
-							<option value="P" selected>
-							Portrait (vertical)
-							</option>
-						</select>
+						<input type="checkbox" name="rotar" value="1" /> Rotar páginas
 						<br />
 						<br />
 						<input type="submit" name="button" id="button" value="Subir Primer PDF" />
