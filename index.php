@@ -14,6 +14,17 @@
 					<form action="subir_primer_pdf.php" method="post" enctype="multipart/form-data" name="form1" id="form1">
 						<input type="file" name="archivoPdf" id="pdf1" />
 						<br />
+						<br />
+						<select name="orientacion">
+							<option value="L">
+							Landscape (horizontal)
+							</option>
+							<option value="P" selected>
+							Portrait (vertical)
+							</option>
+						</select>
+						<br />
+						<br />
 						<input type="submit" name="button" id="button" value="Subir Primer PDF" />
 					</form>
 				</td>

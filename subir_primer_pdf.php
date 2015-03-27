@@ -9,11 +9,15 @@ if (!isset($_FILES['archivoPdf'])) {
 	exit('ya fue, gg tim nub');
 }
 
+$orientacion = isset($_POST['orientacion']) ? $_POST['orientacion'] : 'P';
+
 // info de las imagenes
 $infoImagen = array();
 
 // ruta temporal en el servidor
-$rutaTemporal = __DIR__ . '/temp/';
+//$rutaTemporal = __DIR__ . '/temp/';
+$rutaTemporal = __DIR__ . '/pdf/';
+
 
 // para los archivos temporales
 $aleatorio = '';
@@ -48,23 +52,27 @@ $infoImagen = $image->getImageGeometry();
 require('scripts/fpdf/fpdf.php');
 
 // el objeto FPDF
-$pdf = new FPDF('P','mm',array($infoImagen['width']*P2M, $infoImagen['height']*P2M));
+$pdf = new FPDF($orientacion,'mm',array($infoImagen['width']*P2M, $infoImagen['height']*P2M));
 $pdf->AliasNbPages();
 
 // recorrer las paginas
 for ($i = 0; $i < $totalPaginas; $i++) {
-	// agregar pagina al nuevo PDF
-	$pdf->AddPage();
-
-	// imprimir la imagen
 	$imagen = $rutaTemporal . $aleatorio . "-$i.jpg";
-	$pdf->Image($imagen, 0, 0);
-	
-	// imprimir el contador
-	$contador = '00000' . (CONTADOR + $i);
-	$contador = substr($contador, -4);
-	$pdf->SetFont('Arial', 'B', 35);
-	$pdf->Cell(0, 35, $contador, 0, 0, 'R');
+
+	// validar que archivo exista
+	if (file_exists($imagen)) {
+		// agregar pagina al nuevo PDF
+		$pdf->AddPage();
+
+		// imprimir la imagen
+		$pdf->Image($imagen, 0, 0);
+		
+		// imprimir el contador
+		$contador = '00000' . (CONTADOR + $i);
+		$contador = substr($contador, -4);
+		$pdf->SetFont('Arial', 'B', 35);
+		$pdf->Cell(0, 35, $contador, 0, 0, 'R');
+	}
 }
 
 // borrar los archivos temporales
